@@ -1,0 +1,37 @@
+{
+  "name": "libp2p-browser-example",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "parcel build index.html",
+    "start": "parcel index.html",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/core": "^7.15.0",
+    "@vue/component-compiler-utils": "^3.2.2",
+    "babel-plugin-syntax-async-functions": "^6.13.0",
+    "babel-plugin-transform-regenerator": "^6.26.0",
+    "parcel-bundler": "^1.12.5",
+    "typescript": "^4.3.5",
+    "vue-template-compiler": "^2.6.14"
+  },
+  "dependencies": {
+    "libp2p": "^0.32.1",
+    "libp2p-bootstrap": "^0.13.0",
+    "libp2p-kad-dht": "^0.23.1",
+    "libp2p-mplex": "^0.10.4",
+    "libp2p-noise": "^4.0.0",
+    "libp2p-webrtc-star": "^0.23.0",
+    "libp2p-websockets": "^0.16.1",
+    "peer-id": "^0.15.2",
+    "vue": "^2.6.14",
+    "vue-class-component": "^7.2.6",
+    "vue-hot-reload-api": "^2.3.4",
+    "vue-property-decorator": "^9.1.2"
+  }
+}
