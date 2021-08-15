@@ -1829,4 +1829,4 @@ module.exports=require("./lib/heap");
 },{"babel-polyfill":"VZwm","libp2p":"NlGS","libp2p-websockets":"xJUq","libp2p-webrtc-star":"AIPa","libp2p-noise":"Ta4N","libp2p-mplex":"Z6gr","libp2p-bootstrap":"l3hw","libp2p-kad-dht":"ssqA","peer-id":"xW92","it-pipe":"pfJG","./chat-protocol":"Dl4m","vue-property-decorator":"zBwC"}],"Focm":[function(require,module,exports) {
 "use strict";var e=r(require("vue")),u=r(require("./App.vue"));function r(e){return e&&e.__esModule?e:{default:e}}new e.default({render:function(e){return e(u.default)}}).$mount("#app");
 },{"vue":"NtAQ","./App.vue":"Js2s"}]},{},["Focm"], null)
-//# sourceMappingURL=/js-libp2p-browser-chat.f4f5c2b4.js.map
+//# sourceMappingURL=https://thebojda.github.io/js-libp2p-browser-chat/js-libp2p-browser-chat.f4f5c2b4.js.map
