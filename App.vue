@@ -47,8 +47,7 @@ import Mplex from "libp2p-mplex";
 import Bootstrap from "libp2p-bootstrap";
 import KadDHT from "libp2p-kad-dht";
 import PeerId from "peer-id";
-import pipe from "it-pipe";
-import { buildChatProtocol } from "./chat-protocol";
+import ChatProtocol from "./ChatProtocol";
 import { Component, Vue } from "vue-property-decorator";
 
 const chatProtocol = "/chat/1.0.0";
@@ -65,9 +64,8 @@ export default class App extends Vue {
   private remotePeerId: any = "";
   private chatStream: any = "";
   private chatMessage: string = "";
-  private pushMessage: any;
-  private streamSource: any;
   private messages: string[] = [];
+  private chatProtocol: ChatProtocol;
 
   async init() {
     this.libp2p = await Libp2p.create({
@@ -104,16 +102,13 @@ export default class App extends Vue {
     });
     await this.libp2p.start();
     this.myPeerId = this.libp2p.peerId.toB58String();
-    const { pushMessage, streamSource, streamProcessor } = buildChatProtocol(
-      (msg) => {
-        this.messages.push("> " + msg);
-      }
-    );
-    this.pushMessage = pushMessage;
-    this.streamSource = streamSource;
+    this.chatProtocol = new ChatProtocol();
+    this.chatProtocol.onMessage((msg) => {
+      this.messages.push("> " + msg);
+    });
     this.libp2p.handle(chatProtocol, ({ connection, stream, protocol }) => {
       this.remotePeerId = connection.remoteAddr.getPeerId();
-      pipe(stream, streamProcessor);
+      this.chatProtocol.setIncomingStream(stream);
     });
   }
 
@@ -136,12 +131,12 @@ export default class App extends Vue {
       peerId,
       chatProtocol
     );
-    pipe(this.streamSource, stream);
+    this.chatProtocol.setOutgoingStream(stream);
     this.chatStream = stream;
   }
 
   sendMessage() {
-    this.pushMessage(this.chatMessage);
+    this.chatProtocol.sendMessage(this.chatMessage);
     this.messages.push("< " + this.chatMessage);
     this.chatMessage = "";
   }
