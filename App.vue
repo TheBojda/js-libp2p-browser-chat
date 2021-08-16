@@ -27,7 +27,7 @@
     <p v-for="(msg, idx) in messages" :key="'msg_' + idx">
       {{ msg }}
     </p>
-    <div v-if="chatStream">
+    <div v-if="chatQueue">
       <input type="text" style="width: 600px" v-model="chatMessage" /><button
         @click="sendMessage"
       >
@@ -47,7 +47,9 @@ import Mplex from "libp2p-mplex";
 import Bootstrap from "libp2p-bootstrap";
 import KadDHT from "libp2p-kad-dht";
 import PeerId from "peer-id";
-import ChatProtocol from "./ChatProtocol";
+import pushable from "it-pushable";
+import pipe from "it-pipe";
+import { array2str, str2array } from "./utils";
 import { Component, Vue } from "vue-property-decorator";
 
 const chatProtocol = "/chat/1.0.0";
@@ -62,10 +64,9 @@ export default class App extends Vue {
   private otherPeerMultiaddr: string = "";
   private otherPeerProtocol: string = "";
   private remotePeerId: any = "";
-  private chatStream: any = "";
   private chatMessage: string = "";
   private messages: string[] = [];
-  private chatProtocol: ChatProtocol;
+  private chatQueue: any = false;
 
   async init() {
     this.libp2p = await Libp2p.create({
@@ -102,13 +103,21 @@ export default class App extends Vue {
     });
     await this.libp2p.start();
     this.myPeerId = this.libp2p.peerId.toB58String();
-    this.chatProtocol = new ChatProtocol();
-    this.chatProtocol.onMessage((msg) => {
-      this.messages.push("> " + msg);
-    });
     this.libp2p.handle(chatProtocol, ({ connection, stream, protocol }) => {
       this.remotePeerId = connection.remoteAddr.getPeerId();
-      this.chatProtocol.setIncomingStream(stream);
+      pipe(
+        stream,
+        (source) => {
+          return (async function* () {
+            for await (const buf of source) yield array2str(buf.slice());
+          })();
+        },
+        async (source) => {
+          for await (const msg of source) {
+            this.messages.push("> " + msg);
+          }
+        }
+      );
     });
   }
 
@@ -131,12 +140,20 @@ export default class App extends Vue {
       peerId,
       chatProtocol
     );
-    this.chatProtocol.setOutgoingStream(stream);
-    this.chatStream = stream;
+    this.chatQueue = pushable();
+    pipe(
+      this.chatQueue,
+      (source) => {
+        return (async function* () {
+          for await (const msg of source) yield str2array(msg);
+        })();
+      },
+      stream
+    );
   }
 
   sendMessage() {
-    this.chatProtocol.sendMessage(this.chatMessage);
+    this.chatQueue.push(this.chatMessage);
     this.messages.push("< " + this.chatMessage);
     this.chatMessage = "";
   }
